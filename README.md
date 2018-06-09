@@ -28,6 +28,7 @@ SCREENSHOT
 
 
 <Bold> Credit </bold>
+
 Icon - https://github.com/pwittchen/WeatherIconView 
 Image - Flickr
 Data - OpenWeatherMap
