@@ -42,6 +42,12 @@ Data - OpenWeatherMap
 
 
 
+
+
+
+
+
+
 <bold> Copyright 2018 rahulr321</bold>
 
 Licensed under the Apache License, Version 2.0 (the "License");
