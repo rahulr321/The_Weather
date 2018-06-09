@@ -1,0 +1,228 @@
+
+    protected boolean isLocationEnabled() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            /*
+                Settings.Secure
+                    Secure system settings, containing system preferences that applications can read
+                    but are not allowed to write. These are for preferences that the user must
+                    explicitly modify through the system UI or specialized APIs for those values,
+                    not modified directly by applications.
+            */
+            /*
+                public static final String LOCATION_MODE
+                    The degree of location access enabled by the user.
+
+                    When used with putInt(ContentResolver, String, int), must be one of
+                    LOCATION_MODE_HIGH_ACCURACY, LOCATION_MODE_SENSORS_ONLY,
+                    LOCATION_MODE_BATTERY_SAVING, or LOCATION_MODE_OFF. When used with
+                    getInt(ContentResolver, String), the caller must gracefully handle additional
+                    location modes that might be added in the future.
+
+                    Note: do not rely on this value being present in settings.db or on
+                    ContentObserver notifications for the corresponding Uri.
+                    Use MODE_CHANGED_ACTION to receive changes in this value.
+
+                    Constant Value: "location_mode"
+            */
+            /*
+                public static int getInt (ContentResolver cr, String name, int def)
+                    Convenience function for retrieving a single secure settings value as an integer.
+                    Note that internally setting values are always stored as strings; this function
+                    converts the string to an integer for you. The default value will be returned
+                    if the setting is not defined or not an integer.
+
+                Parameters
+                    cr : The ContentResolver to access.
+                    name : The name of the setting to retrieve.
+                    def : Value to return if the setting is not defined.
+                Returns
+                    The setting's current value, or 'def' if it is not defined or not a valid integer.
+            */
+            // check location state for api version 19 or greater
+            int locationMode = Settings.Secure.getInt(
+                    getApplicationContext().getContentResolver(),
+                    Settings.Secure.LOCATION_MODE,
+                    0
+            );
+
+            /*
+                public static final int LOCATION_MODE_OFF
+                    Location access disabled.
+
+                Constant Value: 0 (0x00000000)
+            */
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+        } else {
+            /*
+                public static String getString (ContentResolver resolver, String name)
+                    Look up a name in the database.
+
+                Parameters
+                    resolver : to access the database with
+                    name : to look up in the table
+                Returns
+                    the corresponding value, or null if not present
+            */
+            /*
+                public static final String LOCATION_PROVIDERS_ALLOWED
+                    This constant was deprecated in API level 19.
+                    use LOCATION_MODE and MODE_CHANGED_ACTION (or PROVIDERS_CHANGED_ACTION)
+
+                    Comma-separated list of location providers that activities may access.
+                    Do not rely on this value being present in settings.db or on ContentObserver
+                    notifications on the corresponding Uri.
+
+                    Constant Value: "location_providers_allowed"
+            */
+            String locationProviders = Settings.Secure.getString(
+                    getApplicationContext().getContentResolver(),
+                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED
+            );
+
+            /*
+                public static boolean isEmpty (CharSequence str)
+                    Returns true if the string is null or 0-length.
+
+                Parameters
+                    str : the string to be examined
+                Returns
+                    true : if str is null or zero length
+            */
+            return !TextUtils.isEmpty(locationProviders);
+        }
+    }
+
+    // Custom method to check GPS service is enabled or disabled
+    protected boolean isGPSEnabled() {
+        /*
+            LocationManager
+                This class provides access to the system location services. These services allow
+                applications to obtain periodic updates of the device's geographical location, or
+                to fire an application-specified Intent when the device enters the proximity of
+                a given geographical location.
+
+                You do not instantiate this class directly; instead, retrieve it through
+                Context.getSystemService(Context.LOCATION_SERVICE).
+        */
+        /*
+            public abstract Object getSystemService (String name)
+                Return the handle to a system-level service by name. The class of the returned
+                object varies by the requested name.
+        */
+        /*
+            public static final String LOCATION_SERVICE
+                Use with getSystemService(Class) to retrieve a LocationManager for
+                controlling location updates.
+
+                Constant Value: "location"
+        */
+        LocationManager manager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+        /*
+            public boolean isProviderEnabled (String provider)
+                Returns the current enabled/disabled status of the given provider.
+
+                If the user has enabled this provider in the Settings menu, true is returned
+                otherwise false is returned
+
+                Callers should instead use LOCATION_MODE unless they depend on provider-specific
+                APIs such as requestLocationUpdates(String, long, float, LocationListener).
+
+                Before API version LOLLIPOP, this method would throw SecurityException if the
+                location permissions were not sufficient to use the specified provider.
+
+            Parameters
+                provider : the name of the provider
+            Returns
+                true : if the provider exists and is enabled
+            Throws
+                IllegalArgumentException : if provider is null
+
+        */
+        boolean GPSStatus = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        return GPSStatus;
+    }
+
+    // Custom method for api level 19 or higher to check location service status
+    protected boolean isLocationEnabledFromAPI19() {
+        int locationMode = Settings.Secure.getInt(
+                getApplicationContext().getContentResolver(),
+                Settings.Secure.LOCATION_MODE,
+                0
+        );
+
+        return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+    }
+
+//    protected void onResume() {
+//        super.onResume();
+//        if (ContextCompat.checkSelfPermission(this,
+//                Manifest.permission.ACCESS_FINE_LOCATION)
+//                != PackageManager.PERMISSION_GRANTED) {
+//
+//            // Should we show an explanation?
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+//                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+//
+//                // Show an expanation to the user *asynchronously* -- don't block
+//                // this thread waiting for the user's response! After the user
+//                // sees the explanation, try again to request the permission.
+//
+//            } else {
+//
+//                // No explanation needed, we can request the permission.
+//
+//                /*ActivityCompat.requestPermissions(this,
+//                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},*/
+//                        //Integer.parseInt("Request Location for Weather "));
+//
+//                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+//                // app-defined int constant. The callback method gets the
+//                // result of the request.
+//            }
+//        }
+//    }
+
+
+/*@Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_CODE_LOCATION) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // success!
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    //    here to request the missing permissions, and then overriding
+                    //    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                Location myLocation =
+                        LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            } else {
+                // Permission was denied or request was cancelled
+            }
+        }
+    }*///MY_LOCATION
+           private void MyLocationRequest() {
+               AlertDialog.Builder builder = new AlertDialog.Builder(this);
+               builder.setMessage(R.string.my_location_dialog_message)
+                       .setTitle(R.string.my_location__dialog_title);
+               // Add the buttons
+               builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
+                   }
+               });
+               builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // User cancelled the dialog
+                   }
+               });
+
+               AlertDialog dialog = builder.create();
+               dialog.show();
+           }

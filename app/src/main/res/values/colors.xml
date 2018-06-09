@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#78909C</color>
+    <color name="colorPrimaryDark">#607D8B</color>
+    <color name="colorAccent">#009c5b</color>
+
+    <color name="colorPrimaryEnd">#546E7A</color>
+
+    <color name="iconColor">#96ffffff</color>
+    <color name="iconLabelColor">#7dffffff</color>
+    <color name="iconLabelColorShadow">#64000000</color>
+
+    <color name="notSelectedDay">#0f000000</color>
+    <color name="selectedDay">#00000000</color>
+
+    <color name="dataUnitColor">#6effffff</color>
+    <color name="timelineLabelColor">#b4ffffff</color>
+    <color name="timelineTimeLabelColor">#8cffffff</color>
+    <color name="timelineWeatherIconColor">#c8ffffff</color>
+    <color name="timelineDividerColor">#14ffffff</color>
+    <color name="timelineFirstMainTempColor">#dcffffff</color>
+
+    <color name="timelineFirstMaxTempColor">#c3ffffff</color>
+    <color name="timelineFirstMinTempColor">#c3ffffff</color>
+    <color name="timelineFirstSunsetTempColor">#96ffffff</color>
+    <color name="timelineFirstSunriseTempColor">#96ffffff</color>
+    <color name="timelineTimeDay">#a5ffffff</color>
+
+
+    <color name="colorTitleText">#ffffffff</color>
+    <color name="cardTableColor">#57796B</color>
+
+</resources>

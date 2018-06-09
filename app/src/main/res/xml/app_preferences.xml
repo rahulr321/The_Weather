@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent">
+    <PreferenceCategory android:title="@string/str_location">
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/location_categories_key"
+            android:summary="@string/location_summery"
+            android:title="@string/location_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/str_forecast">
+        <ListPreference
+            android:defaultValue="@string/temp_celsius"
+            android:entries="@array/temperature_unit_label"
+            android:entryValues="@array/temperature_unit"
+            android:key="@string/temperature_categories_key"
+            android:summary="@string/temp_celsius"
+            android:title="@string/str_temperature" />
+        <ListPreference
+            android:defaultValue="@string/wind_miles"
+            android:entries="@array/wind_speed_unit_label"
+            android:entryValues="@array/wind_speed_unit"
+            android:key="@string/wind_speed_categories_key"
+            android:summary="@string/wind_miles_label"
+            android:title="@string/str_wind_speed" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="About the app">
+        <Preference
+            android:key="@string/about_license_categories_key"
+            android:title="@string/str_license" />
+        <Preference
+            android:key="@string/about_app_categories_key"
+            android:title="@string/app_name"
+            android:summary="1.2 debug"/>
+
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,0 +1,73 @@
+<resources>
+    <string name="app_name">Orbot Weather</string>
+    <string name="action_settings">Settings</string>
+    <string name="search_hint">Enter City Name</string>
+    <string name="title_activity_search_results">Location Search</string>
+
+    <string name="action_refresh">Refresh</string>
+
+    <string name="degree_symbol">°</string>
+    <string name="wind_degree">w_Degree</string>
+    <string name="wind_speed">W-Speed</string>
+    <string name="wind_label">Wind</string>
+    <string name="pressure">Pressure</string>
+    <string name="pressure_label">Pressure</string>
+    <string name="condition_description">condDescription</string>
+    <string name="temp">temp</string>
+    <string name="humdity_label">Humidity</string>
+    <string name="city">cityText</string>
+    <string name="loading">Loading...</string>
+    <string name="day">day</string>
+
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="current_location">Current Location</string>
+    <string name="hour_min">00:00</string>
+    <string name="int_placeHolder">01</string>
+    <string name="pressure_unit"> hPa</string>
+    <string name="number_default">0</string>
+    <string name="percentage"> %</string>
+    <string name="clouds">Clouds</string>
+    <string name="wind_unit"> m/s</string>
+    <string name="main_weather">Main Weather</string>
+    <string name="weather_description">weather description</string>
+    <string name="sunrise">sunrise</string>
+    <string name="sunset">sunset</string>
+    <string name="title_location_detail">Location Detail</string>
+    <string name="time_of_day">Time of Day</string>
+
+    <!--SETTING-->
+    <!--********************************************************************************-->
+    <!--KEY-->
+    <string name="location_categories_key">locationKey</string>
+    <string name="temperature_categories_key">tempKey</string>
+    <string name="wind_speed_categories_key">windKey</string>
+    <string name="about_app_categories_key">aboutAppKey</string>
+    <string name="about_license_categories_key">aboutLicenseKey</string>
+
+    <!--VALUE-->
+    <!--________________________________________________________________________________-->
+    <!--STRING-->
+    <string name="str_location">Location</string>
+    <string name="str_forecast">Forecast</string>
+    <string name="str_temperature">Temperature</string>
+    <string name="str_wind_speed">Wind Speed</string>
+    <string name="str_license">License</string>
+    <!--lOCATION-->
+    <string name="location_title">Show current location</string>
+    <string name="location_summery">Show weather for current location</string>
+    <!--TEMPERATURE-->
+    <string name="temp_celsius">Celsius</string>
+    <string name="temp_fahrenheit">Fahrenheit</string>
+    <!--WIND-->
+    <string name="wind_miles">Miles</string>
+    <string name="wind_kilometer">Kilometers</string>
+    <string name="wind_miles_label">Miles per hour</string>
+    <string name="wind_kilometer_label">Kilometers per hour</string>
+    <string name="country_image">countryImage</string>
+
+    <!--MESSAGE-->
+    <string name="unable_to_open">Unable to open weather details</string>
+    <!--********************************************************************************-->
+
+</resources>

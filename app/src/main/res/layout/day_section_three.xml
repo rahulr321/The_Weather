@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="@color/notSelectedDay"
+    android:orientation="vertical"
+    android:padding="@dimen/abc_list_item_padding_horizontal_material">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView_Day"
+            style="@style/DayLabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/day" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.github.pwittchen.weathericonview.WeatherIconView
+                android:id="@+id/view_weatherIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:fontFamily="sans-serif-light"
+                android:gravity="center"
+                custom:weatherIconColor="@android:color/black"
+                custom:weatherIconResource="@string/wi_day_sunny_overcast"
+                custom:weatherIconSize="65" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="top"
+                android:padding="1dp"
+                android:layout_margin="5dp"
+                android:layout_marginTop="10dp">
+
+
+                <TextView
+                    android:id="@+id/textView_TempCel"
+                    style="@style/tempStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/temp"
+                    android:textColor="#ffffff"
+                    android:textSize="@dimen/abc_text_size_medium_material" />
+                <TextView
+                    android:id="@+id/textView_TempFeh"
+                    style="@style/tempStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/temp"
+                    android:textColor="#ffffff"
+                    android:textSize="@dimen/abc_text_size_medium_material" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/degree_symbol"
+                        android:textColor="#ffffff"
+                        android:textSize="@dimen/abc_text_size_small_material" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

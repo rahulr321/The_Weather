@@ -1,0 +1,54 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '27.0.3'
+    defaultConfig {
+        applicationId "com.orbot.theweather"
+        minSdkVersion 16
+        targetSdkVersion 26
+        versionCode 3
+        versionName "1.2 debug"
+        multiDexEnabled true
+    }
+    buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                    'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                    'proguard-rules.pro'
+        }
+    }
+}
+apply plugin: 'com.android.application'
+dependencies {
+    api 'com.google.android.gms:play-services-location:11.8.0'
+}
+
+dependencies {
+    api fileTree(include: ['*.jar'], dir: 'libs')
+    //need license copy
+    //first party
+    api 'com.android.support:appcompat-v7:26.1.0'
+    api 'com.android.support:design:26.1.0'
+    api 'com.android.support:recyclerview-v7:26.1.0'
+    api 'com.android.support:cardview-v7:26.1.0'
+    api 'com.android.support:palette-v7:26.1.0'
+    api 'com.android.support:preference-v7:26.1.0'
+    api 'com.android.support:preference-v14:26.1.0'
+    api 'com.android.support.constraint:constraint-layout:1.0.2'
+
+    //third party
+    api 'com.facebook.fresco:fresco:1.5.0'
+    api 'com.github.pwittchen:weathericonview:1.1.0'
+
+    api 'com.survivingwithandroid:weatherlib_okhttpclient:1.6.0'
+    api 'com.squareup.okhttp3:okhttp:3.8.1'
+    api 'com.github.franmontiel:AttributionPresenter:1.0'
+    api 'com.akhgupta:android-easylocation:1.0.1'
+    testImplementation 'junit:junit:4.12'
+}

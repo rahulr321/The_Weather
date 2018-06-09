@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/RV_card_list"
+    android:name="com.orbot.theweather.PlaceListFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="?attr/actionBarSize"
+    android:layout_marginLeft="@dimen/abc_action_bar_default_padding_start_material"
+    android:layout_marginRight="@dimen/abc_action_bar_default_padding_end_material"
+    tools:context=".LocationListActivity"
+    tools:listitem="@layout/card_list"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/activity_location_list" />

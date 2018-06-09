@@ -1,0 +1,696 @@
+package com.orbot.theweather;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteException;
+import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
+
+import com.akhgupta.easylocation.EasyLocationAppCompatActivity;
+import com.akhgupta.easylocation.EasyLocationRequest;
+import com.akhgupta.easylocation.EasyLocationRequestBuilder;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.orbot.theweather.Client.TimeZoneHTTPClient;
+import com.orbot.theweather.Client.WeatherHttpClient;
+import com.orbot.theweather.model.CardViewDisplay;
+import com.orbot.theweather.model.CityLocation;
+import com.orbot.theweather.model.CurrentWeather;
+import com.orbot.theweather.model.FlickrImage;
+import com.orbot.theweather.model.JSONImageParser;
+import com.orbot.theweather.model.SearchDatabaseHelper;
+import com.orbot.theweather.model.TimeZoneHelper;
+import com.orbot.theweather.model.Weather;
+import com.orbot.theweather.util.TheWeatherDatabase;
+
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.orbot.theweather.model.MyJSONWeatherParser.getCurrentWeatherCities;
+import static com.orbot.theweather.model.MyJSONWeatherParser.getWeatherCurrent;
+import static com.orbot.theweather.util.AndroidUtils.isInternetAvailable;
+
+public class LocationListActivity extends EasyLocationAppCompatActivity {
+
+    //CityLocation Services
+    // boolean flag to toggle periodic location updates
+    private boolean mRequestingLocationUpdates = false;
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
+    private static int REQUEST_CODE_RECOVER_PLAY_SERVICES = 200;
+    // Google client to interact with Google API
+    // Request code to use when launching the resolution activity
+    private static final int REQUEST_RESOLVE_ERROR = 1001;
+    // Unique tag for the error dialog fragment
+    private static final String DIALOG_ERROR = "dialog_error";
+
+    // Bool to track whether the app is already resolving an error
+    private boolean mResolvingError = false;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private LocationRequest mLocationRequest;
+    // CityLocation updates intervals in sec
+    private static int UPDATE_INTERVAL = 2000000; //  33.33 min
+    private static int FASTEST_INTERVAL = 600000; // 15 min
+
+    final private String DEGREE = "\u00b0";
+    final private int SEARCHRESULT = 1, SETTINGRESULTS = 2;
+
+    private Toolbar mToolbar;
+
+    private RecyclerView recycleViewMenuList;
+    private CardAdapter cardAdapter;
+    private LinearLayoutManager llm;
+
+    private TheWeatherDatabase theWeatherDatabase;
+    private SearchDatabaseHelper myDbHelper;
+    private FloatingActionButton fab;
+
+    private Boolean isFirstRun;
+    private Boolean isCelsius;
+    private Boolean isMiles;
+
+
+    private static Boolean locationState;
+    private static Boolean isMyLocationOn;
+    private CityLocation myCityLocation;
+    private CardViewDisplay myLocation_CardView;
+    private Weather myLocation_Weather;
+
+    private boolean mTwoPane = false;
+    public static Boolean FRESCO = Boolean.FALSE;
+    private static final int REQUEST_CODE_LOCATION = 2;
+    private SharedPreferences sharedPreferences;
+
+    private LocationRequest locationRequest = new LocationRequest();
+    private EasyLocationRequest easyLocationRequest;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Fresco.initialize(this);
+        super.onCreate(savedInstanceState);
+        FRESCO = Boolean.TRUE;
+        setContentView(R.layout.activity_location_list);
+        mToolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
+        setSupportActionBar(mToolbar);                   // Setting toolbar as the ActionBar with setSupportActionBar() call
+        //LAYOUT
+        /*****************************************************************************************/
+        //cards
+        recycleViewMenuList = (RecyclerView) findViewById(R.id.RV_card_list);
+        llm = new LinearLayoutManager(getApplicationContext());
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        recycleViewMenuList.setLayoutManager(llm);
+        cardAdapter = new CardAdapter(PreList());
+        recycleViewMenuList.setAdapter(cardAdapter);
+        /*****************************************************************************************/
+
+        //search
+        final Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivityForResult(intent, SEARCHRESULT);
+            }
+        });
+
+        //function -value
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        handlePreferenceTask();
+
+        //database
+        theWeatherDatabase = new TheWeatherDatabase(getApplicationContext());
+        myDbHelper = new SearchDatabaseHelper(getApplicationContext());
+
+        //main
+        isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getBoolean("isFirstRun", true);
+        if (isFirstRun) {
+            getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit().putBoolean("isFirstRun", false).commit();
+        }
+
+
+        locationState = isLocationEnabled();
+        if (!locationState) {
+            isMyLocationOn = false;
+        }
+
+        //Database
+        /***************************************************************************************************/
+        try {
+            myDbHelper.createDataBase();
+        } catch (IOException ioe) {
+            throw new Error("Unable to create database");
+        }
+        try {
+            myDbHelper.openDataBase();
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+        }
+
+
+        /***********************************************************************************************************************/
+        /***********************************************************************************************************************/
+        CityLocation[] cityLocations = theWeatherDatabase.geAllLocation();
+        for (CityLocation location : cityLocations) {
+            MyStartUPWeatherTask myAddTask = new MyStartUPWeatherTask();
+            myAddTask.execute(location);
+        }
+
+        //
+        //
+        easyLocationRequest = new EasyLocationRequestBuilder()
+                .setLocationRequest(locationRequest)
+                .setFallBackToLastLocationTime(3000)
+                .build();
+        //
+        //
+
+        View.OnClickListener myLocationClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int viewID = v.getId();
+                locationState = isLocationEnabled();
+                switch (viewID) {
+                    case R.id.imageView_Location:
+                        if (locationState) {
+                            if (!isMyLocationOn) {
+
+                            } else {
+                                isMyLocationOn = false;
+                                getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
+                                        .putBoolean(getString(R.string.location_categories_key),
+                                                false).apply();
+
+                                CardViewDisplay cardViewDisplay = new CardViewDisplay(new CurrentWeather());
+                                myLocation_CardView = cardViewDisplay;
+                                cardAdapter.getCardList().set(0, myLocation_CardView);
+                                cardAdapter.getItem(0);
+                            }
+                            Snackbar.make(v, "Location : " + isMyLocationOn, Snackbar.LENGTH_SHORT).show();
+                        } else {
+                            Log.d("ImageViewLocation", "Location Access is Disabled");
+                            Snackbar.make(v, "Location Access is Disabled", Snackbar.LENGTH_LONG).show();
+                        }
+                        break;
+                    case R.id.myCardView:
+
+                        if (isMyLocationOn) {
+                            final Intent intent = new Intent(v.getContext(),
+                                    LocationDetailActivity.class);
+                            int currentPos = recycleViewMenuList.getChildAdapterPosition(v);
+                            if (cardAdapter.getItem(currentPos).getWeather() != null) {
+                                if (mTwoPane) {
+                                    Bundle arguments = new Bundle();
+                                    arguments.putInt(LocationDetailFragment.ARG_ITEM_ID,
+                                            cardAdapter.getItem(currentPos).getWeather().getCityID());
+                                    arguments.putSerializable(LocationDetailFragment
+                                            .ARG_WEATHER_DETAIL, cardAdapter.getItem(currentPos));
+                                    arguments.putSerializable(LocationDetailFragment
+                                            .ARG_COLOUR_SCHEME, v.getDrawingCacheBackgroundColor() + "");
+
+                                    LocationDetailFragment fragment = new LocationDetailFragment();
+                                    fragment.setArguments(arguments);
+                                    getSupportFragmentManager().beginTransaction()
+                                            .replace(R.id.location_detail_container, fragment)
+                                            .commit();
+                                } else {
+                                    Context context = v.getContext();
+                                    intent.putExtra(LocationDetailFragment.ARG_ITEM_ID, cardAdapter
+                                            .getItem(currentPos).getWeather().getCityID());
+                                    intent.putExtra(LocationDetailFragment.ARG_WEATHER_DETAIL,
+                                            cardAdapter.getItem(currentPos));
+
+                                    context.startActivity(intent);
+                                }
+                            }
+                        } else {
+                            if (!locationState) {
+                                Snackbar.make(v, "Location Access is Disabled", Snackbar.LENGTH_LONG).show();
+                            } else {
+                                Snackbar.make(v, "Enabling weather services for current location", Snackbar.LENGTH_LONG).show();
+                            }
+                        }
+                        break;
+                }
+            }
+        };
+        cardAdapter.setOnClickListener(myLocationClickListener);
+
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallBack = new ItemTouchHelper
+                .SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.ACTION_STATE_IDLE) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+
+                final int fromPos = viewHolder.getAdapterPosition();
+                final int toPos = target.getAdapterPosition();
+
+                //don't allow location based to change order
+                if (viewHolder.getItemViewType() != target.getItemViewType()) {
+                    Snackbar.make(fab, "This functionality is not available yet", Snackbar.LENGTH_SHORT).show();
+                    return false;
+                } else {
+                    // Notify the adapter of the move
+                    cardAdapter.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                    Log.d("Card Move", "Item" + cardAdapter.getItem(viewHolder.getAdapterPosition()).getWeather().getCityLocation().getName() + " moved from " + fromPos + " to " + toPos);
+                    return true;// true if moved, false otherwise
+                }
+            }
+
+            @Override
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                if (!(viewHolder instanceof CardAdapter.VHCARD_MyLocation)) {
+                    // Set movement flags based on the layout manager
+                    if (recyclerView.getLayoutManager() instanceof GridLayoutManager) {
+                        final int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.RIGHT;
+                        final int swipeFlags = ItemTouchHelper.ACTION_STATE_IDLE;
+                        return makeMovementFlags(dragFlags, swipeFlags);
+                    } else {
+                        final int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                        final int swipeFlags = ItemTouchHelper.RIGHT;
+                        return makeMovementFlags(dragFlags, swipeFlags);
+                    }
+                } else {
+                    return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.ACTION_STATE_IDLE);
+                }
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                final int position = viewHolder.getAdapterPosition();
+                if (position != 0) {
+                    final CardViewDisplay cardViewDisplay = new CardViewDisplay(cardAdapter.getItem(position).getWeather());
+                    final CityLocation cityLocation = cardAdapter.getItem(position).getWeather().getCityLocation();
+                    if (viewHolder.getItemViewType() != CardAdapter.TYPE_MY_LOCATION) {
+                        theWeatherDatabase.removeLocation(cardViewDisplay.getWeather().getCityID());
+                        cardAdapter.removeItem(position);
+
+                        Snackbar.make(fab, "Card for " + cityLocation.getName() + " has been Deleted.", Snackbar.LENGTH_LONG).setAction("UNDO", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                try {
+                                    theWeatherDatabase.insertLocation(cityLocation);
+                                    cardAdapter.addItemTo(position, cardViewDisplay);
+                                } catch (Exception e) {
+                                    Snackbar.make(fab, "Unable to add Location", Snackbar.LENGTH_SHORT).show();
+                                }
+                            }
+                        }).show();
+                    }
+                } else {
+                    recycleViewMenuList.invalidate();
+                }
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallBack);
+        itemTouchHelper.attachToRecyclerView(recycleViewMenuList);
+
+        if (findViewById(R.id.location_detail_container) != null) {
+            mTwoPane = true;
+        }
+        cardAdapter.setTwoPane(mTwoPane);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            //// TODO: Add better refresh functionality
+            //// Todo: better setting page functionality
+            case R.id.action_refresh:
+                //load item from database
+                // check for update online and update content on database and display
+                Snackbar.make(fab, "Testing Refresh Action", Snackbar.LENGTH_LONG).show();
+                int totalCities = cardAdapter.getCardList().size();
+                String[] cities = new String[totalCities];
+
+                for (int y = 0; y < totalCities; y++) {
+                    if (cardAdapter.getCardList().get(0).getWeather() != null) {
+                        cities[y] = cardAdapter.getCardList().get(y).getWeather().getCityID() + "";
+                    }
+                }
+                UpdateCard updateCard = new UpdateCard();
+                updateCard.execute(cities);
+                break;
+            case R.id.action_settings:
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivityForResult(intent, SETTINGRESULTS);
+                break;
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+        }
+        return false;
+    }
+
+    public void callAsynchronousTask(CityLocation cityLocation) {
+        final CityLocation locatn = cityLocation;
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask doAsynchronousTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            MyStartUPWeatherTask myAddTask = new MyStartUPWeatherTask();
+                            myAddTask.execute(locatn);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(doAsynchronousTask, 250); //execute in every 50000 ms
+    }
+
+    private List<CardViewDisplay> PreList() {
+        List<CardViewDisplay> result = new ArrayList<>();
+
+        myLocation_CardView = new CardViewDisplay(myLocation_Weather);
+        result.add(myLocation_CardView);
+        return result;
+    }
+
+    /*********************************************************************************************/
+//AddCard
+    private class MyStartUPWeatherTask extends AsyncTask<CityLocation, Void, CurrentWeather> {
+        private CardViewDisplay cardViewDisplay;
+        private boolean connected;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            connected = checkInternetConnection();
+        }
+
+        @Override
+        protected CurrentWeather doInBackground(CityLocation... cityLocations) {
+            CityLocation cityLocation = cityLocations[0];
+
+            CurrentWeather currentWeather = new CurrentWeather();
+            try {
+                if (isInternetAvailable(getApplicationContext())) {
+                    //FileNotFoundException
+                    String data = ((new WeatherHttpClient()).getWeatherDataCityID(cityLocation.getCityID() + ""));
+                    currentWeather = getWeatherCurrent(data);
+                    currentWeather.getCityLocation().setIMGURL(cityLocation.getIMGURL());
+
+                    //getUpdated TimeZone
+                    data = ((new TimeZoneHTTPClient()).getLocationTimeZone(cityLocation.getLatitude(), cityLocation.getLongitude(), currentWeather.getDT()));
+                    TimeZoneHelper timeZoneHelper = new TimeZoneHelper(data);
+
+                    currentWeather.getCityLocation().setTimeZone(timeZoneHelper.getTimeZoneId());
+                    currentWeather.getCityLocation().setTimeZoneHelper(timeZoneHelper);
+
+                    Log.d("Timezone", timeZoneHelper.toString());
+                } else if (currentWeather.getMainWeather() == "") {
+                    currentWeather = theWeatherDatabase.getCurrentWeather(cityLocation.getCityID() + "");
+                    currentWeather.setCityLocation(cityLocation);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return currentWeather;
+        }
+
+        @Override
+        protected void onPostExecute(CurrentWeather currentWeather) {
+            super.onPostExecute(currentWeather);
+            try {
+                cardViewDisplay = new CardViewDisplay(currentWeather);
+                cardAdapter.addItem(cardViewDisplay);
+                if (isInternetAvailable(getApplicationContext())) {
+                    theWeatherDatabase.insertCurrentWeather(currentWeather);
+                } else {
+                    Snackbar.make(fab, "Unable to retrieve latest information", Snackbar.LENGTH_LONG).show();
+                }
+            } catch (Exception e) {
+                Log.e("Adding New City", e.toString() + e.getLocalizedMessage());
+                Toast.makeText(LocationListActivity.this, e.toString() + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
+
+    }
+
+/*********************************************************************************************/
+
+    /*********************************************************************************************/
+    private class MyAddTask extends AsyncTask<String, Void, CurrentWeather> {
+        private CardViewDisplay cardViewDisplay;
+        private boolean errorOccured = false;
+        private Exception errorException = null;
+
+        @Override
+        protected CurrentWeather doInBackground(String... params) {
+            //param is the myLocationCordinate's name that is being process;
+            CurrentWeather currentWeather = new CurrentWeather();
+            try {
+                String data = (new WeatherHttpClient()).getWeatherDataCityID(params[0]);
+                currentWeather = getWeatherCurrent(data);
+
+                //Image
+                //the searchData for CityLocation and Criteria
+                JSONImageParser jsonImageParser = new JSONImageParser();
+                data = jsonImageParser.getImageDataFor(JSONImageParser.FLICKERIMAGEREQUESTDATA, currentWeather.getCityLocation().getName(), " Landscape");
+
+                //imageData for first Image from search result
+                FlickrImage flickrImage = jsonImageParser.getFlickrImageData(data);
+                data = jsonImageParser.getFlickrImageURL(flickrImage.getFarmID(), flickrImage.getServerID(), flickrImage.getID(), flickrImage.getSecret());
+                //setImage URL
+                currentWeather.getCityLocation().setIMGURL(data);
+
+                //get TimeZone
+                data = ((new TimeZoneHTTPClient()).getLocationTimeZone(currentWeather.getCityLocation().getLatitude(), currentWeather.getCityLocation().getLongitude(), currentWeather.getDT()));
+                TimeZoneHelper timeZoneHelper = new TimeZoneHelper(data);
+                currentWeather.getCityLocation().setTimeZone(timeZoneHelper.getTimeZoneId());
+                currentWeather.getCityLocation().setTimeZoneHelper(timeZoneHelper);
+                Log.d("Timezone", timeZoneHelper.toString());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                errorOccured = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                errorOccured = true;
+                errorException = e;
+            }
+            return currentWeather;
+        }
+
+        @Override
+        protected void onPostExecute(CurrentWeather weathr) {
+            super.onPostExecute(weathr);
+            try {
+                theWeatherDatabase.insertLocation(weathr.getCityLocation());
+                theWeatherDatabase.insertCurrentWeather(weathr);
+                cardViewDisplay = new CardViewDisplay(weathr);
+                cardAdapter.addItem(cardViewDisplay);
+                cardAdapter.notifyDataSetChanged();
+
+                if (errorOccured) {
+                    Snackbar.make(fab, "Error : " + errorException.toString() + errorException.getLocalizedMessage(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                }
+            } catch (SQLiteException e) {
+                Snackbar.make(fab, "Card for " + weathr.getCityLocation().getName() + " already exist.", Snackbar.LENGTH_LONG).setAction("OK", null).show();
+                e.printStackTrace();
+            } catch (Exception e) {
+                Snackbar.make(fab, "EXCEPTION : " + e.toString() + e.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+            } catch (Throwable throwable) {
+                Snackbar.make(fab, "Throwable :MyAdd : " + throwable.toString() + throwable.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+            }
+        }
+
+    }
+
+    //Update
+    private class UpdateCard extends AsyncTask<String, CurrentWeather, CurrentWeather[]> {
+
+        @Override
+        protected CurrentWeather[] doInBackground(String... params) {
+            String[] cityIDs = params;
+            String data = (new WeatherHttpClient()).getWeatherDataCityIDs(cityIDs);
+            CurrentWeather[] currentCitiesWeather = new CurrentWeather[cityIDs.length];
+            try {
+                currentCitiesWeather = getCurrentWeatherCities(data);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return currentCitiesWeather;
+        }
+
+        @Override
+        protected void onPostExecute(CurrentWeather[] currentWeathers) {
+            super.onPostExecute(currentWeathers);
+
+            List<CardViewDisplay> cardList = cardAdapter.getCardList();
+            for (int x = 0; x < currentWeathers.length; x++) {
+                for (int y = 0; y < cardList.size(); y++) {
+                    //if (currentWeathers[x].getCityID() == cardList.get(y).getCurrentWeather().getCityID()) {
+                    //cardList.get(y).setCurrentWeather(currentWeathers[x]);
+                    //}
+                }
+            }
+
+            cardAdapter.notifyDataSetChanged();
+        }
+
+    }
+
+    private boolean checkInternetConnection() {
+        // get Connectivity Manager object to check connection
+        ConnectivityManager connec = (ConnectivityManager) getSystemService(getBaseContext().CONNECTIVITY_SERVICE);
+
+        // Check for network connections
+        if (connec.getNetworkInfo(0).getState() == NetworkInfo.State.CONNECTED ||
+
+                connec.getNetworkInfo(0).getState() == NetworkInfo.State.CONNECTING ||
+                connec.getNetworkInfo(1).getState() == NetworkInfo.State.CONNECTING ||
+                connec.getNetworkInfo(1).getState() == NetworkInfo.State.CONNECTED) {
+
+            return true;
+        } else if (
+                connec.getNetworkInfo(0).getState() == NetworkInfo.State.DISCONNECTED ||
+                        connec.getNetworkInfo(1).getState() == NetworkInfo.State.DISCONNECTED) {
+            return false;
+        }
+        return false;
+    }
+
+    private void handlePreferenceTask() {
+        String stringValue = getString(R.string.temp_celsius);
+        String keyString = sharedPreferences.getString(getString(R.string.temperature_categories_key),
+                stringValue);
+        if (stringValue.equals(keyString)) {
+            isCelsius = true;
+        } else {
+            isCelsius = false;
+        }
+        cardAdapter.setCelsius(isCelsius);
+        //windSpeed
+        stringValue = getString(R.string.wind_miles);
+        keyString = sharedPreferences.getString(getString(R.string.wind_speed_categories_key),
+                stringValue);
+        if (stringValue.equals(keyString)) {
+            isMiles = true;
+        } else {
+            isMiles = false;
+        }
+        cardAdapter.setMiles(isMiles);
+        cardAdapter.notifyDataSetChanged();
+
+        //current location
+        Boolean tempKey = sharedPreferences.getBoolean(getString(R.string.location_categories_key),
+                true);
+        if (tempKey == Boolean.TRUE) {//turn on my location and carry out it task
+            isMyLocationOn = tempKey;
+            getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
+                    .putBoolean(getString(R.string.location_categories_key),
+                            isMyLocationOn).apply();
+        } else {
+            isMyLocationOn = tempKey;
+            getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
+                    .putBoolean(getString(R.string.location_categories_key),
+                            isMyLocationOn).apply();
+
+            CardViewDisplay cardViewDisplay = new CardViewDisplay(new CurrentWeather());
+            myLocation_CardView = cardViewDisplay;
+            cardAdapter.getCardList().set(0, myLocation_CardView);
+            cardAdapter.getItem(0);
+            //update current location
+            if (mGoogleApiClient != null)
+                stopLocationUpdates();
+        }
+
+    }
+
+    /*******************************************************************************/
+    private boolean isLocationEnabled() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // check location state for api version 19 or greater
+            int locationMode = Settings.Secure.getInt(
+                    getApplicationContext().getContentResolver(),
+                    Settings.Secure.LOCATION_MODE,
+                    0
+            );
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+        } else {
+            String locationProviders = Settings.Secure.getString(
+                    getApplicationContext().getContentResolver(),
+                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED
+            );
+            return !TextUtils.isEmpty(locationProviders);
+        }
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal|top">
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/backdrop_imgiew"
+        android:layout_width="match_parent"
+        android:layout_height="226dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        fresco:actualImageScaleType="focusCrop"
+        fresco:placeholderImage="@drawable/card_colour"
+        fresco:viewAspectRatio="1.33" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/backdrop_imgiew"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:paddingBottom="5dp"
+        android:paddingLeft="@dimen/abc_list_item_padding_horizontal_material"
+        android:paddingRight="@dimen/abc_list_item_padding_horizontal_material">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="20dp"
+            android:orientation="vertical"
+            tools:showIn="@layout/card_list">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+
+                <TextView
+                    android:id="@+id/tempCel"
+                    style="@style/tempStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="-20sp"
+                    android:layout_marginTop="-15sp"
+                    android:includeFontPadding="false"
+                    android:shadowColor="#64000000"
+                    android:shadowRadius="2"
+                    android:text="@string/int_placeHolder"
+                    android:textColor="#ffffff"
+                    android:textSize="@dimen/temp_Height" />
+
+                <TextView
+                    android:id="@+id/tempFeh"
+                    style="@style/tempStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="-20sp"
+                    android:layout_marginTop="-15sp"
+                    android:includeFontPadding="false"
+                    android:shadowColor="#64000000"
+                    android:shadowRadius="2"
+                    android:text="@string/int_placeHolder"
+                    android:textColor="#ffffff"
+                    android:textSize="@dimen/temp_Height" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:shadowColor="#64000000"
+                        android:shadowRadius="1"
+                        android:text="@string/degree_symbol"
+                        android:textColor="#ffffff"
+                        android:textSize="@dimen/abc_text_size_large_material" />
+
+                    <com.github.pwittchen.weathericonview.WeatherIconView
+                        android:id="@+id/iconView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="-10dp"
+                        android:fontFamily="sans-serif-light"
+                        android:shadowColor="#64000000"
+                        android:shadowRadius="2" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView_condDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_gravity="center"
+                android:shadowColor="#af000000"
+                android:shadowRadius="2"
+                android:text="@string/condition_description"
+                android:textColor="#ffffff"
+                android:textSize="@dimen/abc_text_size_medium_material" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/cityText"
+            style="@style/CityLabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="top|center_horizontal"
+            android:shadowColor="#b5000000"
+            android:shadowRadius="1"
+            android:text="@string/city" />
+    </RelativeLayout>
+
+</RelativeLayout>

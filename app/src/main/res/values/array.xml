@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="temperature_unit_label">
+        <item>@string/temp_celsius</item>
+        <item>@string/temp_fahrenheit</item>
+    </string-array>
+    <string-array name="temperature_unit">
+        <item>@string/temp_celsius</item>
+        <item>@string/temp_fahrenheit</item>
+    </string-array>
+    <string-array name="wind_speed_unit_label">
+        <item>@string/wind_miles_label</item>
+        <item>@string/wind_kilometer_label</item>
+    </string-array>
+    <string-array name="wind_speed_unit">
+        <item>@string/wind_miles</item>
+        <item>@string/wind_kilometer</item>
+    </string-array>
+</resources>

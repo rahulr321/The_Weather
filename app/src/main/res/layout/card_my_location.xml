@@ -1,0 +1,87 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    xmlns:tool="http://schemas.android.com/tools"
+
+    android:id="@+id/myCardView"
+    style="@style/my_card_style">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/card_colour">
+
+        <RelativeLayout
+            android:id="@+id/RL_Card_Load"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/card_colour"
+            android:visibility="visible">
+
+            <ProgressBar
+                style="@style/Widget.AppCompat.ProgressBar"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_above="@+id/textView_Loading"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true" />
+
+            <TextView
+                android:id="@+id/textView_Loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:text="@string/loading"
+                android:textColor="@color/button_material_light" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/RL_Card_Info"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:visibility="gone">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/backDrop"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="true"
+                fresco:placeholderImage="@drawable/card_colour" />
+
+            <RelativeLayout
+                style="@style/card_style">
+
+                <TextView
+                    android:id="@+id/cityText"
+                    style="@style/cityStyleCard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|bottom"
+                    android:shadowColor="#7d000000"
+                    tool:text="cityText"
+                    android:textAlignment="center"
+                    android:textColor="#ffffff"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
+                <include layout="@layout/weather_temperature_layout"/>
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <ImageButton
+            android:id="@+id/imageView_LocationToggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|top"
+            android:layout_margin="@dimen/design_snackbar_padding_horizontal"
+            android:background="#0a000000"
+            android:contentDescription="@string/current_location"
+            android:padding="15dp"
+            android:src="@drawable/ic_my_location_24dp" />
+
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

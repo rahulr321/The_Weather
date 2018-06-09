@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true"
+    android:layout_centerHorizontal="true"
+    tools:showIn="@layout/card_list">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:id="@+id/tempCel"
+            style="@style/tempStyle"
+            android:includeFontPadding="false"
+            android:layout_marginBottom="-20sp"
+            android:layout_marginTop="-15sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/int_placeHolder"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/temp_Height"
+            android:shadowColor="#64000000"
+            android:shadowRadius="2" />
+
+        <TextView
+            android:id="@+id/tempFeh"
+            style="@style/tempStyle"
+            android:includeFontPadding="false"
+            android:layout_marginBottom="-20sp"
+            android:layout_marginTop="-15sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/int_placeHolder"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/temp_Height"
+            android:shadowColor="#64000000"
+            android:shadowRadius="2" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/degree_symbol"
+                android:textSize="@dimen/abc_text_size_large_material"
+                android:textColor="#ffffff"
+                android:shadowColor="#b4000000"
+                android:shadowRadius="2" />
+
+            <com.github.pwittchen.weathericonview.WeatherIconView
+                android:id="@+id/weatherIconView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:shadowColor="#b4000000"
+                android:shadowRadius="2"
+                android:layout_marginTop="-10dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView_condDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="@string/condition_description"
+        android:textColor="#c8ffffff"
+        android:layout_gravity="center"
+        android:shadowColor="#64000000"
+        android:shadowRadius="1" />
+
+</LinearLayout>
