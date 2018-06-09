@@ -26,6 +26,16 @@ SCREENSHOT
 <img src="https://user-images.githubusercontent.com/32653005/41194786-36044980-6c19-11e8-8001-a9d6c033d61e.png" data-canonical-src="https://user-images.githubusercontent.com/32653005/41194786-36044980-6c19-11e8-8001-a9d6c033d61e.png" width="320" height="480" />
 
 
+
+<Bold> Credit </bold>
+Icon - https://github.com/pwittchen/WeatherIconView 
+Image - Flickr
+Data - OpenWeatherMap
+
+
+
+
+
 <bold> Copyright 2018 rahulr321</bold>
 
 Licensed under the Apache License, Version 2.0 (the "License");
