@@ -21,7 +21,7 @@ SCREENSHOT
 
 <img src="https://user-images.githubusercontent.com/32653005/41194785-35e5eb2a-6c19-11e8-8406-408c0e1a96ee.png" data-canonical-src="https://user-images.githubusercontent.com/32653005/41194785-35e5eb2a-6c19-11e8-8406-408c0e1a96ee.png" width="320" height="480" />
 
-<img src="https://user-images.githubusercontent.com/32653005/41194787-36280e9c-6c19-11e8-9fea-b22d5357970f.pnghttps://user-images.githubusercontent.com/32653005/41194787-36280e9c-6c19-11e8-9fea-b22d5357970f.png" data-canonical-src="" width="320" height="480" />
+<img src="https://user-images.githubusercontent.com/32653005/41194787-36280e9c-6c19-11e8-9fea-b22d5357970f.png" data-canonical-src="https://user-images.githubusercontent.com/32653005/41194787-36280e9c-6c19-11e8-9fea-b22d5357970f.png" width="320" height="480" />
 
 
 <bold> Copyright 2018 rahulr321</bold>
