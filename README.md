@@ -8,6 +8,7 @@ There's small database in app which is used for search for city location- Credit
 Some of the technique used in the app are not well polished as I'm just noob and just started Android programming, therefore any suggestion are welcome. 
 
 
+Project is incomplete and is not fully tested
 
 
 
